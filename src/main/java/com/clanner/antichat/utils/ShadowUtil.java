@@ -1,5 +1,7 @@
 package com.clanner.antichat.utils;
 
+import org.apache.tomcat.util.codec.binary.Base64;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -109,7 +111,9 @@ public class ShadowUtil {
      * 解密
      */
     public static BigInteger decrypt(BigInteger c, BigInteger priKey, BigInteger pubKey) {
+        long start = System.currentTimeMillis();
         BigInteger m = expMode(c, priKey, pubKey);
+        System.out.println("解密耗时：" + (System.currentTimeMillis() - start) + "毫秒");
         return m;
     }
 
@@ -175,21 +179,10 @@ public class ShadowUtil {
         return builder.toString();
     }
 
-//    public static void main(String[] args) {
-//        String pass = "124fgd";
-//        BigInteger[] genKey = ShadowUtil.genKey();
-//        BigInteger pubKey = genKey[0];
-//        String pubSalt = Base64.encodeBase64URLSafeString(pubKey.toByteArray());
-//        System.out.println("Base64:" + pubSalt);
-//        BigInteger priKey = genKey[1];
-//        String priSalt = Base64.encodeBase64URLSafeString(priKey.toByteArray());
-//        System.out.println("Base64:" + priSalt);
-//        System.out.println("用户密码:" + string2number(pass));
-//        System.out.println("数据库中的密码:" + SHA1(string2number(pass)));
-//        BigInteger tranPass = ShadowUtil.encrypt(pass, pubKey);
-//        System.out.println("传输的密码：" + tranPass);
-//        BigInteger dePass = ShadowUtil.decrypt(tranPass, priKey, pubKey);
-//        System.out.println("解密的密码:" + dePass);
-//        System.out.println("校验的密码：" + ShadowUtil.SHA1("" + dePass));
-//    }
+    public static void main(String[] args) {
+        String pubSalt = "f7SAUqmRcXqqHNe3LlY5BcBx2H6zhMXhsmt3RedTulsOw8qJoFDw0e6y7hLZd52XiLNkyfZYIwvCJwFEsUA6TctuUXuE1HZ1iUDHgs29NLI4eDOxyJmTOonD0J95DsMp-FmbLcjamP0U8jeZlQBQzMqhCKhpdLrmf-m2LtcnQBiNXqMIZTOISbRkMklshKfr9LNrko9ZUZQVhdrY8QuJGeMhAMKugRPHXfz42nhWvriUS47jzwWvP8Z3FqbykIT6vJQxYBf6zCHrK7wE5wknji1o8-2usiIx6s5n2nf4jNy6ePL7Uv8gN81TZFopTm2XZKQ9S2iw15sGo3d_HeRmRw";String pass = "123";
+        BigInteger pubKey = Base64.decodeInteger(pubSalt.getBytes());
+        BigInteger tranPass = ShadowUtil.encrypt(pass, pubKey);
+        System.out.println("传输的密码：" + tranPass);
+    }
 }

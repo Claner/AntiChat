@@ -51,6 +51,7 @@ public class JwtUtil {
     }
 
     public static int getId(String jwtToken) {
+        jwtToken = jwtToken.substring("Bearer ".length());
         Claims claims = getClaims(jwtToken, Constants.LOGIN_KEY);
         return Integer.parseInt(claims.getId());
     }

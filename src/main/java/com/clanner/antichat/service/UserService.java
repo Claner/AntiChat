@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 
 /**
  * @author Clanner
+ * 用户服务
  */
 @Service
 public class UserService {
@@ -40,23 +41,42 @@ public class UserService {
     @Autowired
     private DraftDao draftDao;
 
+    /**
+     * 注册
+     */
     @Transactional(rollbackFor = Exception.class)
     public AntiUser register(int userId, String account, String shadow, String username) {
         String pluSalt = userDao.findPubSaltByAccount(account);
         if (pluSalt == null) {
             //注册用户(后续添加其他操作)
-            AntiUser antiUser = registerUser(userId, account, shadow, username);
-            return antiUser;
+            return registerUser(userId, account, shadow, username);
         }
         return null;
     }
 
+    public boolean freeze(String account) {
+        Integer freeze = userDao.findFreezeByAccount(account);
+        if (freeze == null) return false;
+        return freeze >= 3;
+    }
+
+    /**
+     * 记录登录失败次数
+     */
+    @Transactional
+    public void recordLoginFail(String account) {
+        //只有token为null时才记录登录失败的次数
+        userDao.incrementAndSetFreeze(account);
+    }
+
+    /**
+     * 登录
+     */
     public AntiUserInfo login(String account, String shadow) {
         String pubSalt = userDao.findPubSaltByAccount(account);
         String priSalt = userDao.findPriSaltByAccount(account);
-        BigInteger pubKey = Base64.decodeInteger(pubSalt.getBytes());
-        BigInteger priKey = Base64.decodeInteger(priSalt.getBytes());
-        BigInteger decodePass = ShadowUtil.decrypt(new BigInteger(shadow), priKey, pubKey);
+        BigInteger decodePass = ShadowUtil.decrypt(new BigInteger(shadow),
+                Base64.decodeInteger(priSalt.getBytes()), Base64.decodeInteger(pubSalt.getBytes()));
         Integer userId = userDao.findOneByAccountAndShadow(account, ShadowUtil.SHA1("" + decodePass));
 
         if (userId != null && userId != 0) {
@@ -65,15 +85,39 @@ public class UserService {
         return null;
     }
 
+    /**
+     * 退出登录
+     */
+    @Transactional
+    public void logout(Integer userId) {
+        userDao.deleteTokenById(userId);
+    }
+
+    /**
+     * 生成token并设置登陆状态
+     */
     @Transactional
     public String createAndSetLoginInfo(int userId, String account, String from) {
         String subject = userId + Constants.separator + account + Constants.separator + from;
-        System.out.println(subject);
-        System.out.println(ShadowUtil.MD5(subject));
         String token = JwtUtil.createJWT("" + userId,
                 Constants.ISSUER, subject, "", Constants.EXP_MILLIS, Constants.LOGIN_KEY);
+        userDao.clearFreezeState(account);
         userDao.updateLoginUserInfo(ShadowUtil.MD5(subject), from, userId);
         return token;
+    }
+
+    /**
+     * 修改密码
+     */
+    @Transactional
+    public boolean modifyPassword(int userId, String oldPassword, String newPassword) {
+        String pubSalt = userDao.findPubSaltById(userId);
+        String priSalt = userDao.findPriSaltById(userId);
+        BigInteger pubKey = Base64.decodeInteger(pubSalt.getBytes());
+        BigInteger priKey = Base64.decodeInteger(priSalt.getBytes());
+        String oldShadow = ShadowUtil.SHA1("" + ShadowUtil.decrypt(new BigInteger(oldPassword), priKey, pubKey));
+        String newShadow = ShadowUtil.SHA1(ShadowUtil.string2number(newPassword));
+        return userDao.updateShadow(newShadow, userId, oldShadow) == 1;
     }
 
     private AntiUser registerUser(int userId, String account, String shadow, String username) {
@@ -89,11 +133,11 @@ public class UserService {
     private AntiUser initAntiUser(int userId, String account, String shadow, Timestamp now) {
         long start = System.currentTimeMillis();
         BigInteger[] genKey = ShadowUtil.genKey();
-        logger.info("获取密钥对耗时" + (System.currentTimeMillis() - start) + "毫秒");
         BigInteger pubKey = genKey[0];
         BigInteger priKey = genKey[1];
         String pubSalt = Base64.encodeBase64URLSafeString(pubKey.toByteArray());
         String priSalt = Base64.encodeBase64URLSafeString(priKey.toByteArray());
+        logger.info("生成密钥对耗时" + (System.currentTimeMillis() - start) + "毫秒");
         AntiUser user = new AntiUser();
         user.setId(userId);
         user.setAccount(account);

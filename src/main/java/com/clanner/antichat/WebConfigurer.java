@@ -20,7 +20,7 @@ public class WebConfigurer extends WebMvcConfigurationSupport {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/AntiChat/**")
                 .excludePathPatterns("/AntiChat/User/register")
-                .excludePathPatterns("/AntiChat/User/register");
+                .excludePathPatterns("/AntiChat/User/login");
         super.addInterceptors(registry);
     }
 }

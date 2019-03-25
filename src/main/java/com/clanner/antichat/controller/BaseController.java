@@ -17,6 +17,8 @@ public abstract class BaseController {
     protected Response message(Tip tip) {
         response.setCode(tip.getCode());
         response.setMessage(tip.getName());
+        response.setData(null);
+        response.setDataList(null);
         return response;
     }
 
@@ -24,6 +26,7 @@ public abstract class BaseController {
         response.setCode(tip.getCode());
         response.setMessage(tip.getName());
         response.setData(object);
+        response.setDataList(null);
         return response;
     }
 

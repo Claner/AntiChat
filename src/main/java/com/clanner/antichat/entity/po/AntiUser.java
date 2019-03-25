@@ -1,5 +1,7 @@
 package com.clanner.antichat.entity.po;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -12,27 +14,33 @@ import java.util.Objects;
 public class AntiUser {
     private int id;
     private String account;
+    @JsonIgnore
     private String shadow;
     private String pubSalt;
+    @JsonIgnore
     private String priSalt;
+    @JsonIgnore
     private String mvDevice;
+    @JsonIgnore
     private String pcDevice;
+    @JsonIgnore
     private String token;
     private short maxLimit;
+    @JsonIgnore
     private byte freeze;
     private String antiId;
+    @JsonIgnore
     private byte modifyNum;
     private Timestamp registerAt;
+    @JsonIgnore
     private Timestamp deletedAt;
 
     public AntiUser() {
     }
 
-    public AntiUser(int id, String account, short maxLimit, Timestamp registerAt) {
-        this.id = id;
-        this.account = account;
-        this.maxLimit = maxLimit;
-        this.registerAt = registerAt;
+    public AntiUser(String pubSalt, String priSalt) {
+        this.pubSalt = pubSalt;
+        this.priSalt = priSalt;
     }
 
     @Id
