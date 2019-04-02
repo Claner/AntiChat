@@ -7,6 +7,7 @@ import com.clanner.antichat.entity.po.AntiUser;
 import com.clanner.antichat.entity.po.AntiUserInfo;
 import com.clanner.antichat.service.ModuleIdService;
 import com.clanner.antichat.service.UserService;
+import com.clanner.antichat.service.RedisService;
 import com.clanner.antichat.utils.Constants;
 import com.clanner.antichat.utils.JwtUtil;
 import org.slf4j.Logger;
@@ -29,6 +30,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private ModuleIdService moduleIdService;
+
+    @Autowired
+    private RedisService redisService;
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -53,6 +57,7 @@ public class UserController extends BaseController {
     public Response login(@RequestParam(name = "account") String account,
                           @RequestParam(name = "shadow") String shadow,
                           @RequestParam(name = "mv_device") String mvDevice,
+                          @RequestParam(name = "pc_device", required = false) System pcDevice,
                           HttpServletResponse httpServletResponse) {
         if (userService.freeze(account)) {
             return message(Tip.ACCOUNT_HAS_FREEZE);
@@ -75,7 +80,7 @@ public class UserController extends BaseController {
         return message(Tip.LOGOUT_SUCCESS);
     }
 
-    @PostMapping("/modifyPassword")
+    @PatchMapping("/modifyPassword")
     public Response modifyPassword(@RequestParam(name = "oldPassword") String oldPassword,
                                    @RequestParam(name = "newPassword") String newPassword,
                                    @RequestHeader(name = Constants.Authorization) String token) {

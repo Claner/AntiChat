@@ -34,6 +34,8 @@ public class AntiUser {
     private Timestamp registerAt;
     @JsonIgnore
     private Timestamp deletedAt;
+    private Timestamp loginAt;
+    private Timestamp logoutAt;
 
     public AntiUser() {
     }
@@ -183,30 +185,52 @@ public class AntiUser {
         this.deletedAt = deletedAt;
     }
 
+    @Basic
+    @Column(name = "login_at")
+    public Timestamp getLoginAt() {
+        return loginAt;
+    }
+
+    public void setLoginAt(Timestamp loginAt) {
+        this.loginAt = loginAt;
+    }
+
+    @Basic
+    @Column(name = "logout_at")
+    public Timestamp getLogoutAt() {
+        return logoutAt;
+    }
+
+    public void setLogoutAt(Timestamp logoutAt) {
+        this.logoutAt = logoutAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AntiUser antiUser = (AntiUser) o;
-        return id == antiUser.id &&
-                maxLimit == antiUser.maxLimit &&
-                freeze == antiUser.freeze &&
-                modifyNum == antiUser.modifyNum &&
-                Objects.equals(account, antiUser.account) &&
-                Objects.equals(shadow, antiUser.shadow) &&
-                Objects.equals(pubSalt, antiUser.pubSalt) &&
-                Objects.equals(priSalt, antiUser.priSalt) &&
-                Objects.equals(mvDevice, antiUser.mvDevice) &&
-                Objects.equals(pcDevice, antiUser.pcDevice) &&
-                Objects.equals(token, antiUser.token) &&
-                Objects.equals(antiId, antiUser.antiId) &&
-                Objects.equals(registerAt, antiUser.registerAt) &&
-                Objects.equals(deletedAt, antiUser.deletedAt);
+        AntiUser user = (AntiUser) o;
+        return id == user.id &&
+                maxLimit == user.maxLimit &&
+                freeze == user.freeze &&
+                modifyNum == user.modifyNum &&
+                Objects.equals(account, user.account) &&
+                Objects.equals(shadow, user.shadow) &&
+                Objects.equals(pubSalt, user.pubSalt) &&
+                Objects.equals(priSalt, user.priSalt) &&
+                Objects.equals(mvDevice, user.mvDevice) &&
+                Objects.equals(pcDevice, user.pcDevice) &&
+                Objects.equals(token, user.token) &&
+                Objects.equals(antiId, user.antiId) &&
+                Objects.equals(registerAt, user.registerAt) &&
+                Objects.equals(deletedAt, user.deletedAt) &&
+                Objects.equals(loginAt, user.loginAt) &&
+                Objects.equals(logoutAt, user.logoutAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, account, shadow, pubSalt, priSalt, mvDevice, pcDevice, token, maxLimit, freeze, antiId, modifyNum, registerAt, deletedAt);
+        return Objects.hash(id, account, shadow, pubSalt, priSalt, mvDevice, pcDevice, token, maxLimit, freeze, antiId, modifyNum, registerAt, deletedAt, loginAt, logoutAt);
     }
 
     @Override
@@ -226,6 +250,8 @@ public class AntiUser {
                 ", modifyNum=" + modifyNum +
                 ", registerAt=" + registerAt +
                 ", deletedAt=" + deletedAt +
+                ", loginAt=" + loginAt +
+                ", logoutAt=" + logoutAt +
                 '}';
     }
 }

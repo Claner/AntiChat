@@ -90,7 +90,7 @@ public class UserService {
      */
     @Transactional
     public void logout(Integer userId) {
-        userDao.deleteTokenById(userId);
+        userDao.deleteTokenAndSetLogoutTime(userId);
     }
 
     /**

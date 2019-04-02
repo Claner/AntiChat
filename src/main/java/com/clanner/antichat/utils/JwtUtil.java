@@ -21,7 +21,7 @@ public class JwtUtil {
      * @param subject   接收者
      * @param audience  备用
      * @param ttlMillis 过期时间
-     * @return
+     * @return jwt
      */
     public static String createJWT(String id, String issuer, String subject, String audience, long ttlMillis, String key) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
