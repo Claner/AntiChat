@@ -32,18 +32,18 @@ public interface UserDao extends JpaRepository<AntiUser, Long> {
     @Query(value = "update anti_user  set token = :token, mv_device = :mvDevice, login_at = now() where id = :id", nativeQuery = true)
     void updateLoginUserInfo(@Param("token") String token, @Param("mvDevice") String mvDevice, @Param("id") int userId);
 
-    @Query(value = "select u.token from AntiUser u where u.id = :id")
+    @Query(value = "select a.token from AntiUser a where a.id = :id")
     String findTokenById(@Param("id") int userId);
 
-    @Query(value = "select u.freeze from AntiUser u where u.account = :account")
+    @Query(value = "select a.freeze from AntiUser a where a.account = :account")
     Integer findFreezeByAccount(@Param("account") String account);
 
     @Modifying
-    @Query(value = "update AntiUser  u set u.freeze = (u.freeze + 1) where u.account = :account and (u.loginAt is null or u.logoutAt is not null)")
-    void incrementAndSetFreeze(@Param("account") String account);
+    @Query(value = "update AntiUser  a set a.freeze = (a.freeze + 1) where a.account = :account and (a.loginAt is null or a.logoutAt is not null)")
+    void updateFreeze(@Param("account") String account);
 
     @Modifying
-    @Query(value = "update AntiUser  u set u.freeze = 0 where u.account = :account")
+    @Query(value = "update AntiUser a set a.freeze = 0 where a.account = :account")
     void clearFreezeState(@Param("account") String account);
 
     @Modifying
@@ -51,6 +51,17 @@ public interface UserDao extends JpaRepository<AntiUser, Long> {
     void deleteTokenAndSetLogoutTime(@Param("id") int userId);
 
     @Modifying
-    @Query(value = "update AntiUser u set u.shadow = :newShadow where u.id = :id and u.shadow = :oldShadow")
+    @Query(value = "update AntiUser a set a.shadow = :newShadow where a.id = :id and a.shadow = :oldShadow")
     Integer updateShadow(@Param("newShadow") String newShadow, @Param("id") int userId, @Param("oldShadow") String oldShadow);
+
+    @Modifying
+    @Query(value = "update AntiUser a set a.antiId = :antiId where a.id = :id")
+    Integer updateAntiId(@Param("id") int userId, @Param("antiId") String antiId);
+
+    @Query(value = "select a.modifyNum from AntiUser a where a.id = :id")
+    Integer findModifyNumById(@Param("id") Integer id);
+
+    @Modifying
+    @Query(value = "update AntiUser  a set a.modifyNum = (a.modifyNum - 1) where a.id = :id")
+    void updateModifyNum(@Param("id") Integer id);
 }

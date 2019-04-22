@@ -54,6 +54,9 @@ public class UserService {
         return null;
     }
 
+    /**
+     * 错误次数超过3次则冻结账号
+     */
     public boolean freeze(String account) {
         Integer freeze = userDao.findFreezeByAccount(account);
         if (freeze == null) return false;
@@ -66,7 +69,7 @@ public class UserService {
     @Transactional
     public void recordLoginFail(String account) {
         //只有token为null时才记录登录失败的次数
-        userDao.incrementAndSetFreeze(account);
+        userDao.updateFreeze(account);
     }
 
     /**
@@ -75,8 +78,7 @@ public class UserService {
     public AntiUserInfo login(String account, String shadow) {
         String pubSalt = userDao.findPubSaltByAccount(account);
         String priSalt = userDao.findPriSaltByAccount(account);
-        BigInteger decodePass = ShadowUtil.decrypt(new BigInteger(shadow),
-                Base64.decodeInteger(priSalt.getBytes()), Base64.decodeInteger(pubSalt.getBytes()));
+        BigInteger decodePass = ShadowUtil.decrypt(new BigInteger(shadow), Base64.decodeInteger(priSalt.getBytes()), Base64.decodeInteger(pubSalt.getBytes()));
         Integer userId = userDao.findOneByAccountAndShadow(account, ShadowUtil.SHA1("" + decodePass));
 
         if (userId != null && userId != 0) {
@@ -99,8 +101,7 @@ public class UserService {
     @Transactional
     public String createAndSetLoginInfo(int userId, String account, String from) {
         String subject = userId + Constants.separator + account + Constants.separator + from;
-        String token = JwtUtil.createJWT("" + userId,
-                Constants.ISSUER, subject, "", Constants.EXP_MILLIS, Constants.LOGIN_KEY);
+        String token = JwtUtil.createJWT("" + userId, Constants.ISSUER, subject, "", Constants.EXP_MILLIS, Constants.LOGIN_KEY);
         userDao.clearFreezeState(account);
         userDao.updateLoginUserInfo(ShadowUtil.MD5(subject), from, userId);
         return token;
@@ -118,6 +119,33 @@ public class UserService {
         String oldShadow = ShadowUtil.SHA1("" + ShadowUtil.decrypt(new BigInteger(oldPassword), priKey, pubKey));
         String newShadow = ShadowUtil.SHA1(ShadowUtil.string2number(newPassword));
         return userDao.updateShadow(newShadow, userId, oldShadow) == 1;
+    }
+
+    /**
+     * 修改anti_id
+     */
+    @Transactional
+    public boolean modifyAntiId(int userId, String antiId) {
+        Integer modifyNum = userDao.findModifyNumById(userId);
+        if (modifyNum == null) return false;
+        if (modifyNum > 0) {
+            int row = userDao.updateAntiId(userId, antiId);
+            if (row == 1) {
+                userDao.updateModifyNum(userId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取剩余修改次数
+     *
+     * @param userId
+     * @return
+     */
+    public Integer getModifyNum(int userId) {
+        return userDao.findModifyNumById(userId);
     }
 
     private AntiUser registerUser(int userId, String account, String shadow, String username) {

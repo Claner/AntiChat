@@ -22,6 +22,10 @@ public class AntiUserInfo {
     private String lastAvatar;
     private String historyAvatarPath;
     private Timestamp updAt;
+    private String avatarName;
+    private String coverName;
+    private String musicName;
+    private Integer modifyNum;
 
     public AntiUserInfo() {
     }
@@ -150,6 +154,45 @@ public class AntiUserInfo {
 
     public void setUpdAt(Timestamp updAt) {
         this.updAt = updAt;
+    }
+
+
+    @Basic
+    @Column(name = "avatar_name")
+    public String getAvatarName() {
+        return avatarName;
+    }
+
+    public void setAvatarName(String avatarName) {
+        this.avatarName = avatarName;
+    }
+
+    @Basic
+    @Column(name = "cover_name")
+    public String getCoverName() {
+        return coverName;
+    }
+
+    public void setCoverName(String coverName) {
+        this.coverName = coverName;
+    }
+
+    @Basic
+    @Column(name = "music_name")
+    public String getMusicName() {
+        return musicName;
+    }
+
+    public void setMusicName(String musicName) {
+        this.musicName = musicName;
+    }
+
+    public Integer getModifyNum() {
+        return modifyNum;
+    }
+
+    public void setModifyNum(Integer modifyNum) {
+        this.modifyNum = modifyNum;
     }
 
     @Override

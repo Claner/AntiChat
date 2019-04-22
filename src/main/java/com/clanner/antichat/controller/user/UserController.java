@@ -49,6 +49,7 @@ public class UserController extends BaseController {
                 return message(Tip.HAS_REGISTER);
             }
         } else {
+            logger.error("[register] get user_id fail");
             return message(Tip.SYSTEM_ERROR);
         }
     }
@@ -56,8 +57,7 @@ public class UserController extends BaseController {
     @PostMapping(path = "/login")
     public Response login(@RequestParam(name = "account") String account,
                           @RequestParam(name = "shadow") String shadow,
-                          @RequestParam(name = "mv_device") String mvDevice,
-                          @RequestParam(name = "pc_device", required = false) System pcDevice,
+                          @RequestParam(name = "mvDevice") String mvDevice,
                           HttpServletResponse httpServletResponse) {
         if (userService.freeze(account)) {
             return message(Tip.ACCOUNT_HAS_FREEZE);
@@ -88,6 +88,16 @@ public class UserController extends BaseController {
             return message(Tip.MODIFY_PASSWORD_SUCCESS);
         } else {
             return message(Tip.MODIFY_PASSWORD_Fail);
+        }
+    }
+
+    @PatchMapping("/modifyAntiId")
+    public Response modifyAntiId(@RequestParam(name = "antiId") String antiId,
+                                 @RequestHeader(name = Constants.Authorization) String token) {
+        if (userService.modifyAntiId(JwtUtil.getId(token), antiId)) {
+            return message(Tip.MODIFY_ANTI_ID_SUCCESS);
+        } else {
+            return message(Tip.MODIFY_ANTI_ID_FAIL);
         }
     }
 }
